@@ -27,9 +27,9 @@ Astra-Grid bridges the Hardware-Software Gap in critical infrastructure by deplo
 
 ## Links
 - **Source Code**: https://github.com/SamiraSamrose/astra_grid_production
-- **Site Demo**: 
+- **Site Demo**: https://samirasamrose.github.io/astra_grid_production/
 - **Video Demo**: https://youtu.be/bLwHp6n_fL8
-- **Notebook Access**: 
+- **Notebook Access**: https://colab.research.google.com/github/SamiraSamrose/astra_grid_production/blob/main/Astra_grid.ipynb
 
 ## Tech Stack
 

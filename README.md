@@ -113,8 +113,7 @@ bashpython scripts/train_models.py --model paddleocr --iterations 50
 Download pre-trained weights:
 - **HuggingFace**: https://huggingface.co/samirasamrose/astra_grid_production/astra-grid-ernie-4.5-lora
 - **GitHub**: https://github.com/samirasamrose/astra_grid_production/astra-grid-infrastructure-audit
-
-- https://github.com/SamiraSamrose/astra_grid_production/blob/main/astra-grid-infrastructure-audit.yaml
+- https://github.com/SamiraSamrose/astra_grid_production/tree/main/models/configs
 
 ## API Documentation
 

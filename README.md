@@ -26,9 +26,10 @@ Astra-Grid bridges the Hardware-Software Gap in critical infrastructure by deplo
 - Interactive 3D WebGL infrastructure canvas
 
 ## Links
-- **Source Code**: 
+- **Source Code**: https://github.com/SamiraSamrose/astra_grid_production
 - **Site Demo**: 
 - **Video Demo**: https://youtu.be/bLwHp6n_fL8
+- **Notebook Access**: 
 
 ## Tech Stack
 

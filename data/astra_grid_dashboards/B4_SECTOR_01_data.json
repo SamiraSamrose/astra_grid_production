@@ -1,0 +1,93 @@
+{
+  "audit_report": {
+    "sector": "B4-SECTOR-01",
+    "timestamp": "2025-12-22T23:27:51.587897",
+    "violations": [
+      {
+        "component": "Component-B4-SECTOR-01-1",
+        "violation_type": "High-risk component operating beyond safe parameters",
+        "regulation_violated": "IEC 61850",
+        "required_action": "Immediate shutdown and replacement",
+        "penalty_risk": "High",
+        "regulation_description": "Power utility automation standards"
+      },
+      {
+        "component": "Component-B4-SECTOR-01-2",
+        "violation_type": "High-risk component operating beyond safe parameters",
+        "regulation_violated": "IEEE C2-2023",
+        "required_action": "Immediate shutdown and replacement",
+        "penalty_risk": "High",
+        "regulation_description": "National Electrical Safety Code"
+      },
+      {
+        "component": "Component-B4-SECTOR-01-4",
+        "violation_type": "High-risk component operating beyond safe parameters",
+        "regulation_violated": "IEC 61850",
+        "required_action": "Immediate shutdown and replacement",
+        "penalty_risk": "High",
+        "regulation_description": "Power utility automation standards"
+      },
+      {
+        "component": "Component-B4-SECTOR-01-6",
+        "violation_type": "High-risk component operating beyond safe parameters",
+        "regulation_violated": "IEEE C2-2023",
+        "required_action": "Immediate shutdown and replacement",
+        "penalty_risk": "High",
+        "regulation_description": "National Electrical Safety Code"
+      }
+    ],
+    "compliant_components": [
+      "Component-B4-SECTOR-01-3",
+      "Component-B4-SECTOR-01-5"
+    ],
+    "regulatory_citations": [
+      "IEC 61850",
+      "IEEE C2-2023",
+      "IEC 61850",
+      "IEEE C2-2023"
+    ]
+  },
+  "dashboard_spec": {
+    "sector": "B4-SECTOR-01",
+    "deployment_timestamp": "2025-12-22T23:27:51.596303",
+    "dashboard_url": "https://astra-grid-twin.cloud/b4-sector-01.html",
+    "components": {
+      "violations": 4,
+      "compliant": 2,
+      "total": 6
+    },
+    "visualizations": [
+      {
+        "type": "critical_alert",
+        "component": "Component-B4-SECTOR-01-1",
+        "reconstructed_image_quality": 0.9243982147576926,
+        "alert_color": "#FF4444",
+        "regulation": "IEC 61850"
+      },
+      {
+        "type": "critical_alert",
+        "component": "Component-B4-SECTOR-01-2",
+        "reconstructed_image_quality": 0.8064675367598627,
+        "alert_color": "#FF4444",
+        "regulation": "IEEE C2-2023"
+      },
+      {
+        "type": "critical_alert",
+        "component": "Component-B4-SECTOR-01-4",
+        "reconstructed_image_quality": 0.9374313992090642,
+        "alert_color": "#FF4444",
+        "regulation": "IEC 61850"
+      },
+      {
+        "type": "critical_alert",
+        "component": "Component-B4-SECTOR-01-6",
+        "reconstructed_image_quality": 0.9322398697344205,
+        "alert_color": "#FF4444",
+        "regulation": "IEEE C2-2023"
+      }
+    ],
+    "react_code_length": 4670,
+    "html_code_length": 6980,
+    "status": "deployed"
+  }
+}

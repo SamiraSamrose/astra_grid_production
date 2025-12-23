@@ -1,0 +1,12 @@
+{
+  "generation_timestamp": "2025-12-22T23:36:19.183127",
+  "style": "vibrant",
+  "model": "ERNIE-4.5-8K",
+  "tokens_used": 296,
+  "source_pages": 3,
+  "files": {
+    "html": "/content/generated_webpages/webpage_20251222_233619.html",
+    "markdown": "/content/generated_webpages/webpage_20251222_233619.md",
+    "ocr_data": "/content/generated_webpages/webpage_20251222_233619_ocr.json"
+  }
+}

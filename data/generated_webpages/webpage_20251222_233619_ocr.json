@@ -1,0 +1,175 @@
+{
+  "filename": "infrastructure_report.pdf",
+  "total_pages": 3,
+  "extraction_timestamp": "2025-12-22T23:36:19.182973",
+  "pages": [
+    {
+      "page_number": 1,
+      "layout_elements": [
+        {
+          "type": "title",
+          "text": "Astra-Grid Infrastructure Report",
+          "confidence": 0.98,
+          "bbox": [
+            100,
+            50,
+            500,
+            100
+          ],
+          "font_size": 32
+        },
+        {
+          "type": "subtitle",
+          "text": "Autonomous Telecom & Data Center Guardian",
+          "confidence": 0.96,
+          "bbox": [
+            100,
+            120,
+            500,
+            150
+          ],
+          "font_size": 18
+        },
+        {
+          "type": "paragraph",
+          "text": "This report provides a comprehensive analysis of the infrastructure health, compliance status, and predictive maintenance recommendations for all monitored sectors.",
+          "confidence": 0.95,
+          "bbox": [
+            100,
+            200,
+            500,
+            300
+          ],
+          "font_size": 12
+        }
+      ],
+      "text_blocks": [],
+      "images": [],
+      "tables": []
+    },
+    {
+      "page_number": 2,
+      "layout_elements": [
+        {
+          "type": "heading",
+          "text": "Sector Analysis Summary",
+          "confidence": 0.97,
+          "bbox": [
+            100,
+            50,
+            400,
+            80
+          ],
+          "font_size": 24
+        },
+        {
+          "type": "paragraph",
+          "text": "The following table presents key metrics across all monitored sectors, including component counts, violation rates, and compliance scores.",
+          "confidence": 0.94,
+          "bbox": [
+            100,
+            100,
+            500,
+            150
+          ],
+          "font_size": 12
+        }
+      ],
+      "text_blocks": [],
+      "images": [],
+      "tables": [
+        {
+          "rows": [
+            [
+              "Sector",
+              "Components",
+              "Violations",
+              "Compliance Score"
+            ],
+            [
+              "B4-SECTOR-01",
+              "6",
+              "2",
+              "67%"
+            ],
+            [
+              "B4-SECTOR-02",
+              "6",
+              "1",
+              "83%"
+            ],
+            [
+              "B4-SECTOR-03",
+              "6",
+              "3",
+              "50%"
+            ]
+          ],
+          "confidence": 0.92,
+          "bbox": [
+            100,
+            170,
+            500,
+            350
+          ]
+        }
+      ]
+    },
+    {
+      "page_number": 3,
+      "layout_elements": [
+        {
+          "type": "heading",
+          "text": "Recommendations & Action Items",
+          "confidence": 0.96,
+          "bbox": [
+            100,
+            50,
+            450,
+            80
+          ],
+          "font_size": 24
+        },
+        {
+          "type": "list_item",
+          "text": "\u2022 Immediate replacement required for critical components in B4-SECTOR-03",
+          "confidence": 0.93,
+          "bbox": [
+            100,
+            120,
+            500,
+            145
+          ],
+          "font_size": 12
+        },
+        {
+          "type": "list_item",
+          "text": "\u2022 Schedule preventive maintenance for B4-SECTOR-01 within 48 hours",
+          "confidence": 0.94,
+          "bbox": [
+            100,
+            160,
+            500,
+            185
+          ],
+          "font_size": 12
+        },
+        {
+          "type": "list_item",
+          "text": "\u2022 Update safety protocols to comply with IEEE C2-2023 standards",
+          "confidence": 0.95,
+          "bbox": [
+            100,
+            200,
+            500,
+            225
+          ],
+          "font_size": 12
+        }
+      ],
+      "text_blocks": [],
+      "images": [],
+      "tables": []
+    }
+  ]
+}

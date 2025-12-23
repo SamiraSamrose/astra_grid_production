@@ -1,0 +1,33 @@
+{
+  "scan_id": "SCAN-B4-SECTOR-01-20240101120000",
+  "sector": "B4-SECTOR-01",
+  "timestamp": "2024-01-01T12:00:00Z",
+  "scanner": "RDK-X5-001",
+  "components": [
+    {
+      "component_id": "B4-SECTOR-01-COMP-001",
+      "type": "Power Supply Unit",
+      "serial": "SN-12345",
+      "status": "Normal",
+      "ocr_confidence": 0.95,
+      "temperature": 45.2,
+      "voltage": 230.5,
+      "position": {"x": 12.5, "y": 3.2, "z": 1.0},
+      "image_path": "images/psu_001.jpg"
+    },
+    {
+      "component_id": "B4-SECTOR-01-COMP-002",
+      "type": "Network Switch",
+      "serial": "SN-12346",
+      "status": "Warning",
+      "ocr_confidence": 0.88,
+      "temperature": 68.5,
+      "voltage": 228.3,
+      "position": {"x": 12.5, "y": 4.0, "z": 1.0},
+      "image_path": "images/switch_001.jpg"
+    }
+  ],
+  "scan_duration_seconds": 45.2,
+  "ocr_model_version": "paddleocr-vl-1.0",
+  "scan_quality": "high"
+}

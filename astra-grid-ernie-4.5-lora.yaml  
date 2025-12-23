@@ -1,0 +1,36 @@
+model_meta:
+  base_foundation: ERNIE-4.5-21B
+  version: 1.0.4-alpha
+  dtype: bfloat16
+  quantization: 4bit-nf4
+
+weight_tensors_state:
+  # LoRA A and B matrices for the 21B parameter backbone
+  layers: 0-31
+  lora_parameters:
+    rank_r: 64
+    alpha: 128
+    scaling_factor: 2.0
+  
+  # Fine-tuned Weight Deltas (Representational)
+  target_modules:
+    q_proj:
+      weight_mean: -0.00042
+      weight_std: 0.0152
+      delta_magnitude: 0.12%
+    v_proj:
+      weight_mean: 0.00018
+      weight_std: 0.0189
+      delta_magnitude: 0.15%
+    gate_proj:
+      weight_mean: -0.0011
+      weight_std: 0.0220
+      delta_magnitude: 0.09%
+
+training_derivation:
+  source_configs:
+    - llamafactory_config.yaml # Focus: IEEE/OSHA Regulatory Logic
+    - unsloth_config.yaml      # Focus: Structural Power Reasoning
+  active_adapter_weights:
+    adapter_0: telecom_safety_v3
+    adapter_1: structural_reasoning_v1

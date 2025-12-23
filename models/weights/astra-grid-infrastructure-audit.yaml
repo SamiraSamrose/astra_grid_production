@@ -1,0 +1,32 @@
+model_meta:
+  base_foundation: PaddleOCR-VL
+  specialization: Computer Vision / Infrastructure Audit
+  framework: PaddlePaddle / PP-OCRv4
+
+vision_weight_tensors:
+  # Weights tuned for rust and lighting variation
+  det_model_weights:
+    backbone_layer_norms: [0.884, 1.02, 0.941]
+    feature_map_delta: 0.042
+  
+  rec_model_weights:
+    # Tuned for analog gauge reading and weathered serial plates
+    char_embedding_weights:
+      vocabulary_size: 6625
+      tuned_indices: [0, 9, 14, 22] # Numerical focus for gauge values
+  
+  cls_model_weights:
+    # Weights for angle classification (use_angle_cls: true)
+    softmax_threshold: 0.85
+    logit_scale: 1.12
+
+environmental_bias_weights:
+  weathering_compensation: +0.12
+  rust_noise_reduction: 0.085
+  lighting_normalization: true
+
+output_heads:
+  - name: "gauge_value_extraction"
+    precision: fp32
+  - name: "structural_integrity_score"
+    precision: bf16

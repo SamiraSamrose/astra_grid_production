@@ -1,0 +1,2142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astra-Grid: Complete Interactive Demo</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 5px;
+        }
+
+        .nav-tabs::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .nav-tabs::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+        }
+
+        .nav-tabs::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+        }
+
+        .nav-tabs button {
+            padding: 12px 20px;
+            background: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .nav-tabs button.active {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            animation: fadeIn 0.3s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .theme-safe { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .theme-warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .theme-emergency { background: linear-gradient(135deg, #ef4444, #dc2626); }
+
+        .control-panel {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .kpi-card {
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .kpi-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .robot-canvas-3d {
+            width: 100%;
+            height: 650px;
+            background: linear-gradient(135deg, #1e293b, #334155);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            border: 3px solid #667eea;
+            cursor: crosshair;
+        }
+
+        .grid-lines {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(0deg, rgba(255,255,255,0.05) 0px, transparent 1px, transparent 50px),
+                repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0px, transparent 1px, transparent 50px);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+
+        @keyframes slide-in {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .robot {
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle, #667eea, #4c51bf);
+            border-radius: 50%;
+            position: absolute;
+            transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 30px rgba(102, 126, 234, 0.8), 0 0 60px rgba(102, 126, 234, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            z-index: 100;
+            animation: pulse 2s infinite;
+        }
+
+        .robot::before {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .component-marker {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            z-index: 10;
+        }
+
+        .component-marker:hover {
+            transform: scale(1.4) rotate(360deg);
+            z-index: 50;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+        }
+
+        .component-marker.scanning {
+            animation: pulse 1s infinite;
+            box-shadow: 0 0 20px currentColor;
+        }
+
+        .asset-panel {
+            position: fixed;
+            right: -450px;
+            top: 0;
+            width: 450px;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 20px rgba(0,0,0,0.3);
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2000;
+            overflow-y: auto;
+            padding: 30px;
+        }
+
+        .asset-panel.open {
+            right: 0;
+        }
+
+        .asset-panel-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .ghost-overlay-toggle {
+            background: rgba(139, 92, 246, 0.9);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 10px 0;
+            display: inline-block;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .ghost-overlay-toggle:hover {
+            background: rgba(139, 92, 246, 1);
+            transform: scale(1.05);
+        }
+
+        .agent-feed {
+            background: #1e293b;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin-top: 20px;
+        }
+
+        .agent-log {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-left: 4px solid #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            animation: slide-in 0.3s;
+            border-radius: 4px;
+        }
+
+        .agent-log.warning { border-left-color: #f59e0b; background: rgba(245, 158, 11, 0.1); }
+        .agent-log.critical { border-left-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+
+        .agent-name {
+            color: #67e8f9;
+            font-weight: bold;
+        }
+
+        .telemetry-panel {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .sandbox-panel {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #f59e0b;
+            margin-top: 20px;
+        }
+
+        .sandbox-textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #d97706;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 500px;
+            margin-top: 20px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 5px 0;
+        }
+
+        .status-normal { background: #d1fae5; color: #065f46; }
+        .status-warning { background: #fef3c7; color: #92400e; }
+        .status-critical { background: #fee2e2; color: #991b1b; }
+        .status-stable { background: #d1fae5; color: #065f46; }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .result-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .result-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .stats-panel {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .component-tooltip {
+            position: fixed;
+            background: rgba(0,0,0,0.95);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            pointer-events: none;
+            z-index: 3000;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 300px;
+        }
+
+        .sync-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            animation: pulse 1.5s infinite;
+        }
+
+        .sync-active { background: #10b981; }
+        .sync-syncing { background: #f59e0b; }
+
+        /* Advanced Analytics Layout */
+        .advanced-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .analytics-sidebar {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            height: fit-content;
+            position: sticky;
+            top: 120px;
+        }
+
+        .analytics-sidebar h3 {
+            margin-bottom: 15px;
+            color: #667eea;
+            font-size: 16px;
+        }
+
+        .analytics-sidebar button {
+            display: block;
+            width: 100%;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        .analytics-sidebar button:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .analytics-sidebar button.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .analytics-content {
+            background: white;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="component-tooltip" id="tooltip"></div>
+
+    <div class="asset-panel" id="assetPanel">
+        <button class="asset-panel-close" onclick="closeAssetPanel()">×</button>
+        <div id="assetContent"></div>
+    </div>
+
+    <div class="header">
+        <h1>Astra-Grid: Autonomous Telecom & Data Center Guardian</h1>
+        <!--<p>All Features & Advanced Analytics</p> -->
+    </div>
+
+    <div class="container">
+        <div class="nav-tabs">
+            <button class="active" onclick="showTab('overview')">System Overview</button>
+            <button onclick="showTab('robot3d')">3D Robot Canvas</button>
+            <button onclick="showTab('agents')">Multi-Agent System</button>
+            <button onclick="showTab('telemetry')">Drill-Down Telemetry</button>
+            <button onclick="showTab('sandbox')">Scenario Sandbox</button>
+            <button onclick="showTab('compliance')">Compliance & ROI</button>
+            <button onclick="showTab('comparison')">Colab vs Production</button>
+            <button onclick="showTab('advanced')">Advanced Analytics</button>
+        </div>
+
+        <div id="overview" class="tab-content active">
+            <h2>System Overview - Critical KPIs</h2>
+            
+            <div class="control-panel">
+                <h3>Adaptive Color Palette Control</h3>
+                <div class="control-group">
+                    <button class="btn" onclick="setGridHealth('safe')">Set Safe Mode (Blue)</button>
+                    <button class="btn" onclick="setGridHealth('warning')">Set Warning Mode (Amber)</button>
+                    <button class="btn" onclick="setGridHealth('emergency')">Set Emergency Mode (Red)</button>
+                </div>
+            </div>
+
+            <div class="kpi-grid" id="kpiGrid">
+                <div class="kpi-card theme-safe">
+                    <div class="kpi-label">Total Grid Load</div>
+                    <div class="kpi-value" id="kpi-load">68.4 MW</div>
+                </div>
+                <div class="kpi-card theme-safe">
+                    <div class="kpi-label">Active Alerts</div>
+                    <div class="kpi-value" id="kpi-alerts">3</div>
+                </div>
+                <div class="kpi-card theme-safe">
+                    <div class="kpi-label">System Health</div>
+                    <div class="kpi-value" id="kpi-health">87%</div>
+                </div>
+                <div class="kpi-card theme-safe">
+                    <div class="kpi-label">
+                        <span class="sync-indicator sync-active"></span>Sync Status
+                    </div>
+                    <div class="kpi-value" id="kpi-sync">85ms</div>
+                </div>
+            </div>
+
+            <div id="overview-charts" class="chart-container"></div>
+        </div>
+
+        <div id="robot3d" class="tab-content">
+            <h2>Live 3D Infrastructure Canvas with Point-to-Robot Navigation</h2>
+            
+            <div class="control-panel">
+                <h3>Robot Controls (RDK X5 Edge Device)</h3>
+                <div class="control-group">
+                    <label>
+                        Target Sector:
+                        <select id="target-sector">
+                            <option>B4-SECTOR-01</option>
+                            <option>B4-SECTOR-02</option>
+                            <option>B4-SECTOR-03</option>
+                        </select>
+                    </label>
+                    <button class="btn" onclick="startAutonomousPatrol()">Start Autonomous Patrol</button>
+                    <button class="btn btn-secondary" onclick="stopPatrol()">Stop Patrol</button>
+                    <button class="btn" onclick="resetRobotPosition()">Reset Position</button>
+                    <button class="btn" onclick="toggleGhostOverlayGlobal()">Toggle Ghost Overlay</button>
+                </div>
+                <p style="margin-top: 10px; color: #666;">
+                    <strong>Point-to-Robot Navigation:</strong> Click anywhere on the canvas to send robot to that location
+                </p>
+            </div>
+
+            <div class="robot-canvas-3d" id="robotCanvas" onclick="handleCanvasClick(event)">
+                <div class="grid-lines"></div>
+                <div class="robot" id="robot">🤖</div>
+            </div>
+
+            <div class="agent-feed" id="robotFeed">
+                <div class="agent-log">
+                    <span class="agent-name">[System]</span> Click on canvas or components to interact. Click "Start Patrol" to begin autonomous operation.
+                </div>
+            </div>
+        </div>
+
+        <div id="agents" class="tab-content">
+            <h2>Multi-Agent System Coordination (CAMEL-AI Framework)</h2>
+            
+            <div class="control-panel">
+                <h3>Execute Complete Audit Workflow</h3>
+                <div class="control-group">
+                    <label>
+                        Audit Sector:
+                        <input type="text" id="agent-sector" value="B4-SECTOR-01" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px;" />
+                    </label>
+                    <button class="btn" onclick="executeFullWorkflow()">Execute Multi-Agent Audit</button>
+                </div>
+            </div>
+
+            <div class="agent-feed" id="agentFeed"></div>
+            <div id="agent-timeline" class="chart-container"></div>
+        </div>
+
+        <div id="telemetry" class="tab-content">
+            <h2>Drill-Down Telemetry - 30-Day Historical Analysis</h2>
+            
+            <div class="control-panel">
+                <h3>Select Component for Telemetry</h3>
+                <div class="control-group">
+                    <label>
+                        Component ID:
+                        <select id="telemetry-component">
+                            <option>B4-SECTOR-01-COMP-001</option>
+                            <option>B4-SECTOR-01-COMP-005</option>
+                            <option>B4-SECTOR-02-COMP-003</option>
+                        </select>
+                    </label>
+                    <label>
+                        Time Period:
+                        <select id="telemetry-period">
+                            <option>7 Days</option>
+                            <option>30 Days</option>
+                            <option>60 Days</option>
+                            <option>90 Days</option>
+                        </select>
+                    </label>
+                    <button class="btn" onclick="loadTelemetryData()">Load Telemetry</button>
+                </div>
+            </div>
+
+            <div id="telemetry-chart" class="chart-container"></div>
+            <div id="telemetry-stats" class="telemetry-panel"></div>
+        </div>
+
+        <div id="sandbox" class="tab-content">
+            <h2>Synthetic Scenario Sandbox - What-If Analysis</h2>
+            
+            <div class="sandbox-panel">
+                <h3>Edit Markdown Configuration</h3>
+                <textarea class="sandbox-textarea" id="sandboxMarkdown"># Sector Configuration: B4-SECTOR-01
+
+## Component Status
+| Component | Temperature | Voltage | Status |
+|-----------|-------------|---------|--------|
+| COMP-001  | 45.2°C      | 230V    | Normal |
+| COMP-002  | 68.5°C      | 228V    | Warning |
+| COMP-003  | 85.2°C      | 215V    | Critical |
+
+## Load Configuration
+- Increase load by: 40%
+- Simulate cooling failure: Yes</textarea>
+                <div style="margin-top: 15px;">
+                    <button class="btn" onclick="runScenarioSimulation()">Run ERNIE Simulation</button>
+                    <button class="btn btn-secondary" onclick="resetScenario()">Reset Configuration</button>
+                </div>
+            </div>
+
+            <div id="sandbox-results" class="results-grid"></div>
+            <div id="sandbox-chart" class="chart-container"></div>
+        </div>
+
+        <div id="compliance" class="tab-content">
+            <h2>Regulatory Compliance & Predictive ROI</h2>
+            
+            <div class="control-panel">
+                <h3>Run Compliance Audit</h3>
+                <div class="control-group">
+                    <label>
+                        Sector:
+                        <input type="text" id="comp-sector" value="B4-SECTOR-01" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px;" />
+                    </label>
+                    <button class="btn" onclick="runComplianceAudit()">LLaMA-Factory Compliance Check</button>
+                    <button class="btn" onclick="calculateROI()">Calculate Predictive ROI</button>
+                </div>
+            </div>
+
+            <div id="compliance-results" class="results-grid"></div>
+            <div id="roi-chart" class="chart-container"></div>
+        </div>
+
+        <div id="comparison" class="tab-content">
+            <h2>Colab Research vs Production System - Complete Results</h2>
+            
+            <div class="results-grid">
+                <div class="result-card">
+                    <h4>Colab Research Results</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>OCR Accuracy:</span><span>95.3%</span></div>
+                        <div class="stats-row"><span>Training Loss:</span><span>0.342</span></div>
+                        <div class="stats-row"><span>Prediction F1:</span><span>0.9421</span></div>
+                        <div class="stats-row"><span>Processing:</span><span>92ms avg</span></div>
+                    </div>
+                </div>
+                <div class="result-card">
+                    <h4>Production System Results</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>OCR Accuracy:</span><span>95.0%</span></div>
+                        <div class="stats-row"><span>Inference:</span><span>85ms</span></div>
+                        <div class="stats-row"><span>Prediction:</span><span>94.0%</span></div>
+                        <div class="stats-row"><span>Uptime:</span><span>99.7%</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="comparison-chart" class="chart-container"></div>
+        </div>
+
+        <div id="advanced" class="tab-content">
+            <h2>Advanced Analytics & Performance Metrics</h2>
+            
+            <div class="advanced-layout">
+                <div class="analytics-sidebar">
+                    <h3>Analytics Dashboard</h3>
+                    <button class="active" onclick="showAnalytics('statistical')">Statistical Analysis</button>
+                    <button onclick="showAnalytics('comparative')">Comparative Outcomes</button>
+                    <button onclick="showAnalytics('predictive')">Predictive Maintenance</button>
+                    <button onclick="showAnalytics('roi')">ROI & Financial</button>
+                    <button onclick="showAnalytics('agent')">Agent Performance</button>
+                    <button onclick="showAnalytics('scalability')">Scalability Testing</button>
+                    <button onclick="showAnalytics('patrol')">Patrol Optimization</button>
+                    <button onclick="showAnalytics('obstacle')">Obstacle Avoidance</button>
+                    <button onclick="showAnalytics('handwriting')">Handwriting OCR</button>
+                    <button onclick="showAnalytics('fiber')">Fiber-Optic Analysis</button>
+                    <button onclick="showAnalytics('temporal')">Temporal Patterns</button>
+                    <button onclick="showAnalytics('ironwood')">Ironwood TPU</button>
+                    <button onclick="showAnalytics('embodied')">Embodied AI Impact</button>
+                </div>
+
+                <div class="analytics-content">
+                    <div id="advanced-chart-1" class="chart-container"></div>
+                    <div id="advanced-chart-2" class="chart-container"></div>
+                    <div id="advanced-stats" class="results-grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let robotX = 50, robotY = 50;
+        let components = [];
+        let patrolInterval = null;
+        let isPatrolling = false;
+        let currentTheme = 'safe';
+        let ghostOverlayEnabled = false;
+        let currentSelectedComponent = null;
+        let currentAnalytics = 'statistical';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCanvas();
+            renderAllCharts();
+            startLiveSync();
+            loadStatisticalAnalysis();
+        });
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-tabs button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (tabName === 'advanced' && currentAnalytics) {
+                showAnalytics(currentAnalytics);
+            }
+        }
+
+        function showAnalytics(type) {
+            currentAnalytics = type;
+            document.querySelectorAll('.analytics-sidebar button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const analyticsMap = {
+                'statistical': loadStatisticalAnalysis,
+                'comparative': loadComparativeOutcomes,
+                'predictive': loadPredictiveMaintenance,
+                'roi': loadROIFinancial,
+                'agent': loadAgentPerformance,
+                'scalability': loadScalabilityTests,
+                'patrol': loadPatrolOptimization,
+                'obstacle': loadObstacleAvoidance,
+                'handwriting': loadHandwritingOCR,
+                'fiber': loadFiberOpticAnalysis,
+                'temporal': loadTemporalFailure,
+                'ironwood': loadIronwoodTPU,
+                'embodied': loadEmbodiedAI
+            };
+            
+            if (analyticsMap[type]) {
+                analyticsMap[type]();
+            }
+        }
+
+        function initializeCanvas() {
+            const canvas = document.getElementById('robotCanvas');
+            if (!canvas) return;
+
+            const statuses = ['normal', 'warning', 'critical'];
+            const colors = {normal: '#10b981', warning: '#f59e0b', critical: '#ef4444'};
+            const emojis = {normal: '✓', warning: '⚠', critical: '❌'};
+
+            components = [];
+            
+            for (let i = 0; i < 15; i++) {
+                const col = i % 5;
+                const row = Math.floor(i / 5);
+                const x = 100 + col * 130;
+                const y = 100 + row * 180;
+                const status = statuses[Math.floor(Math.random() * 100) > 85 ? (Math.random() > 0.5 ? 2 : 1) : 0];
+                
+                const marker = document.createElement('div');
+                marker.className = 'component-marker';
+                marker.style.left = x + 'px';
+                marker.style.top = y + 'px';
+                marker.style.background = colors[status];
+                marker.textContent = emojis[status];
+                marker.setAttribute('data-id', i);
+                marker.setAttribute('data-status', status);
+                
+                marker.onmouseenter = (e) => showComponentTooltip(e, i, status, x, y);
+                marker.onmouseleave = hideTooltip;
+                marker.onclick = (e) => {
+                    e.stopPropagation();
+                    openAssetPanel(i, status, x, y);
+                };
+                
+                canvas.appendChild(marker);
+                components.push({id: i, x, y, status, temp: 40 + Math.random() * 45, voltage: 220 + Math.random() * 20});
+            }
+
+            addLog('3D Infrastructure Canvas initialized with 15 components', 'normal');
+        }
+
+        function handleCanvasClick(event) {
+            if (event.target.classList.contains('component-marker')) return;
+            
+            const canvas = document.getElementById('robotCanvas');
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left - 25;
+            const y = event.clientY - rect.top - 25;
+
+            moveRobotTo(x, y);
+            addLog(`Point-to-Robot command: Moving to (${Math.round(x)}, ${Math.round(y)})`, 'normal');
+        }
+
+        function moveRobotTo(x, y) {
+            const robot = document.getElementById('robot');
+            robot.style.left = x + 'px';
+            robot.style.top = y + 'px';
+            robotX = x;
+            robotY = y;
+        }
+
+        function resetRobotPosition() {
+            stopPatrol();
+            moveRobotTo(50, 50);
+            addLog('Robot reset to initial position (50, 50)', 'normal');
+        }
+
+        function startAutonomousPatrol() {
+            if (isPatrolling) {
+                addLog('Patrol already active', 'warning');
+                return;
+            }
+
+            isPatrolling = true;
+            const sector = document.getElementById('target-sector').value;
+            addLog(`Starting autonomous patrol of ${sector}`, 'normal');
+            addLog('PaddleOCR-VL model loaded on RDK X5 edge device', 'normal');
+
+            let targetIndex = 0;
+            
+            patrolInterval = setInterval(() => {
+                if (targetIndex >= components.length) {
+                    targetIndex = 0;
+                    addLog('Patrol cycle completed. Restarting...', 'normal');
+                }
+
+                const target = components[targetIndex];
+                const marker = document.querySelector(`[data-id="${target.id}"]`);
+                
+                if (marker) marker.classList.add('scanning');
+
+                moveRobotTo(target.x, target.y);
+
+                setTimeout(() => {
+                    const confidence = 0.75 + Math.random() * 0.24;
+                    
+                    if (confidence < 0.85) {
+                        addLog(`COMP-${String(target.id).padStart(3, '0')}: Low confidence ${(confidence * 100).toFixed(1)}% - Repositioning`, 'warning');
+                        setTimeout(() => {
+                            addLog(`COMP-${String(target.id).padStart(3, '0')}: Rescan complete - Confidence 94.2%`, 'normal');
+                        }, 600);
+                    } else {
+                        addLog(`COMP-${String(target.id).padStart(3, '0')}: Scanned - Temp ${target.temp.toFixed(1)}°C - Confidence ${(confidence * 100).toFixed(1)}%`, 'normal');
+                    }
+
+                    if (target.status === 'critical') {
+                        addLog(`ALERT: COMP-${String(target.id).padStart(3, '0')} CRITICAL - Notifying Analyst Agent`, 'critical');
+                    }
+
+                    if (marker) marker.classList.remove('scanning');
+                }, 1000);
+
+                targetIndex++;
+            }, 2500);
+        }
+
+        function stopPatrol() {
+            if (patrolInterval) {
+                clearInterval(patrolInterval);
+                patrolInterval = null;
+                isPatrolling = false;
+                addLog('Patrol stopped', 'warning');
+                document.querySelectorAll('.component-marker').forEach(m => m.classList.remove('scanning'));
+            }
+        }
+
+        function showComponentTooltip(e, id, status, x, y) {
+            const comp = components[id];
+            const tooltip = document.getElementById('tooltip');
+            tooltip.style.display = 'block';
+            tooltip.style.left = e.pageX + 15 + 'px';
+            tooltip.style.top = e.pageY + 15 + 'px';
+            tooltip.innerHTML = `
+                <strong>Component B4-COMP-${String(id).padStart(3, '0')}</strong><br>
+                Status: ${status.toUpperCase()}<br>
+                Position: (${Math.round(x)}, ${Math.round(y)})<br>
+                Temp: ${comp.temp.toFixed(1)}°C<br>
+                Voltage: ${comp.voltage.toFixed(1)}V<br>
+                <em>Click to view Digital Birth Certificate</em>
+            `;
+        }
+
+        function hideTooltip() {
+            document.getElementById('tooltip').style.display = 'none';
+        }
+
+        function openAssetPanel(id, status, x, y) {
+            currentSelectedComponent = id;
+            const comp = components[id];
+            const panel = document.getElementById('assetPanel');
+            const content = document.getElementById('assetContent');
+
+            content.innerHTML = `
+                <h2>Digital Birth Certificate</h2>
+                <h3>Component B4-COMP-${String(id).padStart(3, '0')}</h3>
+                
+                <div class="stats-panel">
+                    <h4>Component Details</h4>
+                    <div class="stats-row"><span>Status:</span><span class="status-badge status-${status}">${status.toUpperCase()}</span></div>
+                    <div class="stats-row"><span>Position:</span><span>(${Math.round(x)}, ${Math.round(y)}, 1.5)</span></div>
+                    <div class="stats-row"><span>Temperature:</span><span>${comp.temp.toFixed(1)}°C</span></div>
+                    <div class="stats-row"><span>Voltage:</span><span>${comp.voltage.toFixed(1)}V</span></div>
+                    <div class="stats-row"><span>OCR Confidence:</span><span>94.2%</span></div>
+                    <div class="stats-row"><span>Scanned By:</span><span>PaddleOCR-VL on RDK X5</span></div>
+                </div>
+
+                <div class="stats-panel" style="margin-top: 15px;">
+                    <h4>PDF Schematic Reference</h4>
+                    <p style="color: #666; font-size: 13px;">Original schematic: fiber-optic-layout-b4-${String(id).padStart(3, '0')}.pdf</p>
+                    <div style="background: #f0f0f0; padding: 15px; border-radius: 5px; margin-top: 10px;">
+                        <code style="font-size: 12px;">
+# Component ${String(id).padStart(3, '0')} Layout<br>
+Type: Server Blade<br>
+Serial: SN-${10000 + id}<br>
+Power: ${comp.voltage.toFixed(0)}V / 15A
+                        </code>
+                    </div>
+                </div>
+
+                <div class="stats-panel" style="margin-top: 15px;">
+                    <h4>Baidu AI Studio Visual Audit</h4>
+                    <p style="color: #666; font-size: 13px;">High-resolution micro-fracture detection analysis</p>
+                    <div class="stats-row"><span>Structural Integrity:</span><span>${status === 'critical' ? 'Micro-fracture detected' : 'No defects'}</span></div>
+                    <div class="stats-row"><span>Analysis Confidence:</span><span>96.8%</span></div>
+                </div>
+
+                ${status === 'critical' || status === 'warning' ? `
+                    <div class="ghost-overlay-toggle" id="ghost-toggle-panel" onclick="toggleGhostOverlay()">
+                        ${ghostOverlayEnabled ? '✓ Ghost Overlay Active' : 'Enable Ghost Overlay (Novita API)'}
+                    </div>
+                    <p style="font-size: 12px; color: #666; margin-top: 10px;" id="ghost-status-text">
+                        ${ghostOverlayEnabled ? 'Showing reconstructed perfect-condition imagery' : 'Click to overlay reconstructed imagery on damaged component'}
+                    </p>
+                ` : ''}
+            `;
+
+            panel.classList.add('open');
+            addLog(`Opened asset panel for COMP-${String(id).padStart(3, '0')}`, 'normal');
+        }
+
+        function closeAssetPanel() {
+            document.getElementById('assetPanel').classList.remove('open');
+            currentSelectedComponent = null;
+        }
+
+        function toggleGhostOverlay() {
+            ghostOverlayEnabled = !ghostOverlayEnabled;
+            addLog(`Novita Ghost Overlay: ${ghostOverlayEnabled ? 'ENABLED' : 'DISABLED'}`, 'normal');
+            
+            const toggleBtn = document.getElementById('ghost-toggle-panel');
+            const statusText = document.getElementById('ghost-status-text');
+            
+            if (toggleBtn) {
+                toggleBtn.textContent = ghostOverlayEnabled ? '✓ Ghost Overlay Active' : 'Enable Ghost Overlay (Novita API)';
+            }
+            
+            if (statusText) {
+                statusText.textContent = ghostOverlayEnabled ? 
+                    'Showing reconstructed perfect-condition imagery' : 
+                    'Click to overlay reconstructed imagery on damaged component';
+            }
+            
+            if (ghostOverlayEnabled) {
+                addLog('Novita API: Reconstructing damaged labels with image inpainting', 'normal');
+                setTimeout(() => {
+                    addLog('Novita API: Reconstruction complete - Quality 96.3%', 'normal');
+                }, 1500);
+            }
+        }
+
+        function toggleGhostOverlayGlobal() {
+            ghostOverlayEnabled = !ghostOverlayEnabled;
+            addLog(`Global Novita Ghost Overlay: ${ghostOverlayEnabled ? 'ENABLED' : 'DISABLED'}`, 'normal');
+            
+            if (ghostOverlayEnabled) {
+                addLog('Novita API: Global reconstruction mode activated', 'normal');
+            }
+        }
+
+        function setGridHealth(health) {
+            currentTheme = health;
+            const themes = {
+                safe: 'theme-safe',
+                warning: 'theme-warning',
+                emergency: 'theme-emergency'
+            };
+
+            document.querySelectorAll('.kpi-card').forEach(card => {
+                card.className = `kpi-card ${themes[health]}`;
+            });
+
+            addLog(`Grid health set to: ${health.toUpperCase()} - Color theme updated`, health === 'safe' ? 'normal' : (health === 'warning' ? 'warning' : 'critical'));
+        }
+
+        function executeFullWorkflow() {
+            const sector = document.getElementById('agent-sector').value;
+            const feed = document.getElementById('agentFeed');
+            feed.innerHTML = '';
+
+            const steps = [
+                {agent: 'User', msg: `Audit request: ${sector}`, level: 'normal', delay: 0},
+                {agent: 'Infrastructure Scout', msg: 'Initiating RDK X5 navigation', level: 'normal', delay: 500},
+                {agent: 'Infrastructure Scout', msg: 'PaddleOCR-VL processing 18 components', level: 'normal', delay: 1500},
+                {agent: 'Infrastructure Scout', msg: 'OCR average confidence: 92.4%', level: 'normal', delay: 2500},
+                {agent: 'Network Analyst', msg: 'Analyzing with Unsloth ERNIE 4.5', level: 'normal', delay: 3500},
+                {agent: 'Network Analyst', msg: 'Temperature trend detected: +0.5°C/day', level: 'warning', delay: 4500},
+                {agent: 'Network Analyst', msg: 'PREDICTION: COMP-005 failure 82% within 48h', level: 'critical', delay: 5500},
+                {agent: 'Compliance Auditor', msg: 'Running LLaMA-Factory compliance check', level: 'normal', delay: 6500},
+                {agent: 'Compliance Auditor', msg: 'Checking OSHA 1910.269, IEEE C2-2023, NFPA 70E', level: 'normal', delay: 7500},
+                {agent: 'Compliance Auditor', msg: 'VIOLATION: Arc-flash boundary exceeded', level: 'critical', delay: 8500},
+                {agent: 'Compliance Auditor', msg: 'Citing OSHA 1910.269(l)(8)(ii)', level: 'critical', delay: 9500},
+                {agent: 'Compliance Auditor', msg: 'Baidu AI Studio: Micro-fracture 1.2mm detected', level: 'warning', delay: 10500},
+                {agent: 'Web Orchestrator', msg: 'Generating React dashboard with ERNIE 4.5', level: 'normal', delay: 11500},
+                {agent: 'Web Orchestrator', msg: 'Integrating Novita reconstructed imagery', level: 'normal', delay: 12500},
+                {agent: 'Web Orchestrator', msg: 'Dashboard deployed: astra-grid-twin.cloud/b4-01', level: 'normal', delay: 13500},
+                {agent: 'System', msg: 'BigQuery validation: 18/18 components verified', level: 'normal', delay: 14500},
+                {agent: 'System', msg: 'Workflow complete - Digital twin synchronized', level: 'normal', delay: 15500}
+            ];
+
+            steps.forEach(step => {
+                setTimeout(() => {
+                    const log = document.createElement('div');
+                    log.className = `agent-log ${step.level}`;
+                    log.innerHTML = `<span style="color: #94a3b8; font-size: 11px;">${new Date().toLocaleTimeString()}</span> <span class="agent-name">[${step.agent}]</span> ${step.msg}`;
+                    feed.appendChild(log);
+                    feed.scrollTop = feed.scrollHeight;
+                }, step.delay);
+            });
+
+            setTimeout(() => renderAgentTimeline(), 16000);
+        }
+
+        function loadTelemetryData() {
+            const component = document.getElementById('telemetry-component').value;
+            const period = document.getElementById('telemetry-period').value;
+            const days = parseInt(period);
+
+            const dates = Array.from({length: days * 24}, (_, i) => i);
+            const temps = dates.map((_, i) => 45 + (i / (days * 24)) * 20 + (Math.random() - 0.5) * 8);
+            const voltages = dates.map(() => 220 + Math.random() * 15);
+            const currents = dates.map(() => 10 + Math.random() * 8);
+
+            const data = [
+                {x: dates, y: temps, name: 'Temperature (°C)', yaxis: 'y', line: {color: '#ef4444', width: 2}},
+                {x: dates, y: voltages, name: 'Voltage (V)', yaxis: 'y2', line: {color: '#3b82f6', width: 2}},
+                {x: dates, y: currents, name: 'Current (A)', yaxis: 'y3', line: {color: '#10b981', width: 2}}
+            ];
+
+            const layout = {
+                title: `${component} - ${period} Telemetry History`,
+                xaxis: {title: 'Hours Ago'},
+                yaxis: {title: 'Temperature', side: 'left', color: '#ef4444'},
+                yaxis2: {title: 'Voltage', side: 'right', overlaying: 'y', color: '#3b82f6'},
+                yaxis3: {title: 'Current', side: 'right', overlaying: 'y', position: 0.95, color: '#10b981'},
+                height: 500
+            };
+
+            Plotly.newPlot('telemetry-chart', data, layout);
+
+            document.getElementById('telemetry-stats').innerHTML = `
+                <h4>Statistical Analysis</h4>
+                <div class="stats-row"><span>Avg Temperature:</span><span>${(temps.reduce((a,b)=>a+b)/temps.length).toFixed(1)}°C</span></div>
+                <div class="stats-row"><span>Temp Std Dev:</span><span>${calculateStdDev(temps).toFixed(2)}°C</span></div>
+                <div class="stats-row"><span>Avg Voltage:</span><span>${(voltages.reduce((a,b)=>a+b)/voltages.length).toFixed(1)}V</span></div>
+                <div class="stats-row"><span>Voltage Std Dev:</span><span>${calculateStdDev(voltages).toFixed(2)}V</span></div>
+                <div class="stats-row"><span>Current Spikes:</span><span>${currents.filter(c => c > 15).length} events</span></div>
+            `;
+
+            addLog(`Loaded ${period} telemetry for ${component}`, 'normal');
+        }
+
+        function calculateStdDev(arr) {
+            const avg = arr.reduce((a,b) => a+b) / arr.length;
+            return Math.sqrt(arr.map(x => Math.pow(x - avg, 2)).reduce((a,b) => a+b) / arr.length);
+        }
+
+        function runScenarioSimulation() {
+            const markdown = document.getElementById('sandboxMarkdown').value;
+            addLog('Running ERNIE 4.5 scenario simulation...', 'normal');
+
+            setTimeout(() => {
+                const hasLoadIncrease = markdown.includes('40%');
+                const hasCoolingFailure = markdown.includes('cooling failure: Yes');
+
+                const failureProb = 0.15 + (hasLoadIncrease ? 0.35 : 0) + (hasCoolingFailure ? 0.40 : 0);
+                const category = failureProb > 0.7 ? 'Critical' : (failureProb > 0.4 ? 'Warning' : 'Stable');
+
+                document.getElementById('sandbox-results').innerHTML = `
+                    <div class="result-card">
+                        <h4>Simulation Results</h4>
+                        <div class="stats-panel">
+                            <div class="stats-row"><span>Failure Probability:</span><span>${(failureProb * 100).toFixed(1)}%</span></div>
+                            <div class="stats-row"><span>Risk Category:</span><span class="status-badge status-${category.toLowerCase()}">${category}</span></div>
+                            <div class="stats-row"><span>Time to Failure:</span><span>${failureProb > 0.7 ? '36 hours' : 'N/A'}</span></div>
+                            <div class="stats-row"><span>Predicted Downtime:</span><span>${failureProb > 0.7 ? '48 hours' : '0 hours'}</span></div>
+                        </div>
+                    </div>
+                    <div class="result-card">
+                        <h4>Impact Analysis</h4>
+                        <div class="stats-panel">
+                            <div class="stats-row"><span>Load Increase Impact:</span><span>${hasLoadIncrease ? '+35% risk' : 'None'}</span></div>
+                            <div class="stats-row"><span>Cooling Failure Impact:</span><span>${hasCoolingFailure ? '+40% risk' : 'None'}</span></div>
+                            <div class="stats-row"><span>Affected Components:</span><span>${hasLoadIncrease || hasCoolingFailure ? '3 critical' : '0'}</span></div>
+                        </div>
+                    </div>
+                `;
+
+                const simData = [{
+                    values: [failureProb, 1 - failureProb],
+                    labels: ['Failure Risk', 'Stable'],
+                    type: 'pie',
+                    marker: {colors: ['#ef4444', '#10b981']}
+                }];
+
+                Plotly.newPlot('sandbox-chart', simData, {title: 'Scenario Risk Distribution', height: 400});
+
+                addLog(`Simulation complete: ${category} risk detected`, category === 'Critical' ? 'critical' : 'normal');
+            }, 2000);
+        }
+
+        function resetScenario() {
+            document.getElementById('sandboxMarkdown').value = `# Sector Configuration: B4-SECTOR-01
+
+## Component Status
+| Component | Temperature | Voltage | Status |
+|-----------|-------------|---------|--------|
+| COMP-001  | 45.2°C      | 230V    | Normal |
+| COMP-002  | 68.5°C      | 228V    | Warning |
+| COMP-003  | 85.2°C      | 215V    | Critical |`;
+            addLog('Scenario configuration reset', 'normal');
+        }
+
+        function runComplianceAudit() {
+            const sector = document.getElementById('comp-sector').value;
+            addLog(`Running LLaMA-Factory compliance audit for ${sector}`, 'normal');
+
+            setTimeout(() => {
+                const violations = Math.floor(Math.random() * 3);
+                
+                document.getElementById('compliance-results').innerHTML = `
+                    <div class="result-card">
+                        <h4>Compliance Status</h4>
+                        <div class="stats-panel">
+                            <div class="stats-row"><span>Sector:</span><span>${sector}</span></div>
+                            <div class="stats-row"><span>Violations Found:</span><span class="status-badge ${violations > 0 ? 'status-critical' : 'status-normal'}">${violations}</span></div>
+                            <div class="stats-row"><span>OSHA 1910.269:</span><span>${violations > 0 ? 'Non-Compliant' : 'Compliant'}</span></div>
+                            <div class="stats-row"><span>IEEE C2-2023:</span><span>Compliant</span></div>
+                            <div class="stats-row"><span>NFPA 70E:</span><span>Compliant</span></div>
+                        </div>
+                    </div>
+                    ${violations > 0 ? `
+                        <div class="result-card">
+                            <h4>Violations Detected</h4>
+                            <div class="stats-panel">
+                                <div class="stats-row"><span>Arc-flash boundary exceeded</span><span>OSHA 1910.269(l)(8)(ii)</span></div>
+                            </div>
+                        </div>
+                    ` : ''}
+                `;
+
+                addLog(`Compliance audit complete: ${violations} violations`, violations > 0 ? 'critical' : 'normal');
+            }, 1500);
+        }
+
+        function calculateROI() {
+            const years = [0, 1, 2, 3, 4, 5];
+            const investment = years.map(y => 500000 + y * 80000);
+            const savings = years.map(y => y * 150000);
+            const netBenefit = years.map((y, i) => savings[i] - investment[i]);
+
+            const roiData = [
+                {x: years, y: investment, name: 'Investment', type: 'scatter', mode: 'lines+markers', line: {color: '#ef4444', width: 3}},
+                {x: years, y: savings, name: 'Savings', type: 'scatter', mode: 'lines+markers', line: {color: '#10b981', width: 3}},
+                {x: years, y: netBenefit, name: 'Net Benefit', type: 'scatter', mode: 'lines+markers', line: {color: '#667eea', width: 3}}
+            ];
+
+            Plotly.newPlot('roi-chart', roiData, {
+                title: 'Predictive ROI Analysis - 5-Year Projection',
+                xaxis: {title: 'Year'},
+                yaxis: {title: 'Amount ($)'},
+                height: 500
+            });
+
+            addLog('Predictive ROI calculated: 450% ROI at Year 5, $150K annual savings', 'normal');
+        }
+
+        function renderAllCharts() {
+            const hours = Array.from({length: 24}, (_, i) => i);
+            const scanned = hours.map(() => 1000 + Math.random() * 500);
+
+            const data1 = [{
+                x: hours,
+                y: scanned,
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: {color: '#667eea', width: 3},
+                fill: 'tozeroy'
+            }];
+
+            Plotly.newPlot('overview-charts', data1, {
+                title: 'Components Scanned (24 Hours) - Production System',
+                xaxis: {title: 'Hour'},
+                yaxis: {title: 'Count'},
+                height: 400
+            });
+
+            const compData = [{
+                x: ['OCR', 'Prediction', 'Latency', 'Uptime'],
+                y: [95.3, 94.2, 92, 99.5],
+                name: 'Colab',
+                type: 'bar',
+                marker: {color: '#667eea'}
+            }, {
+                x: ['OCR', 'Prediction', 'Latency', 'Uptime'],
+                y: [95.0, 94.0, 85, 99.7],
+                name: 'Production',
+                type: 'bar',
+                marker: {color: '#764ba2'}
+            }];
+
+            Plotly.newPlot('comparison-chart', compData, {
+                title: 'Colab Research vs Production Performance',
+                barmode: 'group',
+                height: 500
+            });
+        }
+
+        function renderAgentTimeline() {
+            const agentData = [{
+                x: [0, 1.5, 3.5, 7.5, 11.5, 15.5],
+                y: ['Start', 'Scout', 'Analyst', 'Auditor', 'Orchestrator', 'Complete'],
+                type: 'scatter',
+                mode: 'lines+markers',
+                marker: {size: 12, color: '#667eea'},
+                line: {width: 3}
+            }];
+
+            Plotly.newPlot('agent-timeline', agentData, {
+                title: 'Multi-Agent Workflow Timeline (seconds)',
+                xaxis: {title: 'Time (s)'},
+                height: 400
+            });
+        }
+
+        function addLog(message, level) {
+            const feeds = ['robotFeed', 'agentFeed'];
+            feeds.forEach(feedId => {
+                const feed = document.getElementById(feedId);
+                if (!feed) return;
+
+                const log = document.createElement('div');
+                log.className = `agent-log ${level}`;
+                log.innerHTML = `<span style="color: #94a3b8; font-size: 11px;">${new Date().toLocaleTimeString()}</span> ${message}`;
+                feed.insertBefore(log, feed.firstChild);
+
+                if (feed.children.length > 50) {
+                    feed.removeChild(feed.lastChild);
+                }
+            });
+        }
+
+        function startLiveSync() {
+            setInterval(() => {
+                const syncElem = document.getElementById('kpi-sync');
+                if (syncElem) {
+                    const latency = 80 + Math.floor(Math.random() * 10);
+                    syncElem.textContent = latency + 'ms';
+                }
+
+                const loadElem = document.getElementById('kpi-load');
+                if (loadElem) {
+                    const load = (68 + Math.random() * 2).toFixed(1);
+                    loadElem.textContent = load + ' MW';
+                }
+            }, 3000);
+        }
+
+        // ADVANCED ANALYTICS FUNCTIONS
+
+        function loadStatisticalAnalysis() {
+            addLog('Loading Statistical Analysis - Performance Metrics and Trade-offs', 'normal');
+            
+            const metrics = ['OCR Accuracy', 'Inference Speed', 'Memory Usage', 'Power Consumption', 'Prediction F1'];
+            const rdkX5 = [95.3, 85, 2.1, 15, 94.2];
+            const cloudBaseline = [96.1, 120, 8.5, 45, 94.8];
+            
+            const data1 = [
+                {x: metrics, y: rdkX5, name: 'RDK X5 Edge', type: 'bar', marker: {color: '#667eea'}},
+                {x: metrics, y: cloudBaseline, name: 'Cloud Baseline', type: 'bar', marker: {color: '#f59e0b'}}
+            ];
+            
+            const tradeoffs = rdkX5.map((v, i) => ((v / cloudBaseline[i]) * 100).toFixed(1));
+            const data2 = [{
+                values: tradeoffs,
+                labels: metrics,
+                type: 'pie',
+                textinfo: 'label+percent',
+                marker: {colors: ['#10b981', '#3b82f6', '#667eea', '#f59e0b', '#ef4444']}
+            }];
+            
+            Plotly.newPlot('advanced-chart-1', data1, {
+                title: 'Performance Metrics: Edge vs Cloud',
+                barmode: 'group',
+                height: 500,
+                yaxis: {title: 'Performance Score'}
+            });
+            
+            Plotly.newPlot('advanced-chart-2', data2, {
+                title: 'Edge Performance Efficiency Distribution',
+                height: 400
+            });
+            
+            document.getElementById('advanced-stats').innerHTML = `
+                <div class="result-card">
+                    <h4>Statistical Summary</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>Mean OCR Accuracy:</span><span>95.3% ± 1.2%</span></div>
+                        <div class="stats-row"><span>Latency (p95):</span><span>85ms</span></div>
+                        <div class="stats-row"><span>Memory Efficiency:</span><span>75% reduction vs cloud</span></div>
+                        <div class="stats-row"><span>Power Savings:</span><span>67% reduction</span></div>
+                        <div class="stats-row"><span>Edge Advantage Score:</span><span>8.7/10</span></div>
+                    </div>
+                </div>
+                <div class="result-card">
+                    <h4>Trade-off Analysis</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>Accuracy Loss:</span><span>-0.8% (acceptable)</span></div>
+                        <div class="stats-row"><span>Speed Gain:</span><span>+29% faster</span></div>
+                        <div class="stats-row"><span>Cost Reduction:</span><span>$12K/month saved</span></div>
+                        <div class="stats-row"><span>Zero-Latency Operations:</span><span>100% uptime</span></div>
+                        </div>
+                </div>
+            `;
+        }
+
+        function loadComparativeOutcomes() {
+            addLog('Loading Comparative Outcomes Analysis', 'normal');
+            
+            const categories = ['Detection Rate', 'False Positives', 'Response Time', 'Coverage', 'Cost Efficiency'];
+            const manual = [65, 23, 1440, 40, 35];
+            const semiAuto = [78, 15, 360, 60, 55];
+            const astraGrid = [95, 3, 2, 98, 92];
+            
+            const data = [
+                {x: categories, y: manual, name: 'Manual Audits', type: 'bar', marker: {color: '#ef4444'}},
+                {x: categories, y: semiAuto, name: 'Semi-Automated', type: 'bar', marker: {color: '#f59e0b'}},
+                {x: categories, y: astraGrid, name: 'Astra-Grid', type: 'bar', marker: {color: '#10b981'}}
+            ];
+            
+            Plotly.newPlot('advanced-chart-1', data, {
+                title: 'Comparative Outcomes: Astra-Grid vs Traditional Methods',
+                barmode: 'group',
+                height: 500,
+                yaxis: {title: 'Performance Score (%)'}
+            });
+            
+            const improvements = categories.map((cat, i) => ((astraGrid[i] - manual[i]) / manual[i] * 100).toFixed(1));
+            
+            const data2 = [{
+                x: categories,
+                y: improvements,
+                type: 'bar',
+                marker: {color: improvements.map(v => v > 100 ? '#10b981' : '#667eea')}
+            }];
+            
+            Plotly.newPlot('advanced-chart-2', data2, {
+                title: 'Improvement Over Manual Methods (%)',
+                height: 400,
+                yaxis: {title: 'Improvement (%)'}
+            });
+            
+            document.getElementById('advanced-stats').innerHTML = `
+                <div class="result-card">
+                    <h4>Outcome Comparison</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>Detection Improvement:</span><span>+46% over manual</span></div>
+                        <div class="stats-row"><span>False Positive Reduction:</span><span>-87% vs manual</span></div>
+                        <div class="stats-row"><span>Response Time Reduction:</span><span>99.86% faster</span></div>
+                        <div class="stats-row"><span>Coverage Increase:</span><span>+145% area covered</span></div>
+                        <div class="stats-row"><span>Cost Efficiency Gain:</span><span>+163%</span></div>
+                    </div>
+                </div>
+                <div class="result-card">
+                    <h4>Business Impact</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>Downtime Prevented:</span><span>$2.3M annually</span></div>
+                        <div class="stats-row"><span>Labor Hours Saved:</span><span>8,760 hrs/year</span></div>
+                        <div class="stats-row"><span>Safety Incidents:</span><span>-92%</span></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadPredictiveMaintenance() {
+            addLog('Loading Predictive Maintenance Effectiveness Analysis', 'normal');
+            
+            const weeks = Array.from({length: 26}, (_, i) => i + 1);
+            const reactiveFailures = weeks.map(() => Math.floor(Math.random() * 8) + 3);
+            const predictiveFailures = weeks.map(() => Math.floor(Math.random() * 2));
+            const prevented = weeks.map((_, i) => reactiveFailures[i] - predictiveFailures[i]);
+            
+            const data1 = [
+                {x: weeks, y: reactiveFailures, name: 'Reactive (Historical)', type: 'scatter', mode: 'lines', line: {color: '#ef4444', width: 2}},
+                {x: weeks, y: predictiveFailures, name: 'Predictive (Astra-Grid)', type: 'scatter', mode: 'lines', line: {color: '#10b981', width: 2}},
+                {x: weeks, y: prevented, name: 'Failures Prevented', type: 'scatter', mode: 'lines', line: {color: '#667eea', width: 2, dash: 'dash'}}
+            ];
+            
+            Plotly.newPlot('advanced-chart-1', data1, {
+                title: 'Predictive Maintenance: Failure Prevention Over 26 Weeks',
+                xaxis: {title: 'Week'},
+                yaxis: {title: 'Number of Failures'},
+                height: 500
+            });
+            
+            const timeWindows = ['24h', '48h', '72h', '7d', '14d'];
+            const predictionAccuracy = [78.2, 92.4, 94.1, 96.8, 97.5];
+            
+            const data2 = [{
+                x: timeWindows,
+                y: predictionAccuracy,
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: {color: '#667eea', width: 3},
+                marker: {size: 10}
+            }];
+            
+            Plotly.newPlot('advanced-chart-2', data2, {
+                title: 'Prediction Accuracy by Time Window',
+                xaxis: {title: 'Prediction Window'},
+                yaxis: {title: 'Accuracy (%)', range: [70, 100]},
+                height: 400
+            });
+            
+            const totalPrevented = prevented.reduce((a, b) => a + b, 0);
+            const avgReactive = reactiveFailures.reduce((a, b) => a + b, 0) / reactiveFailures.length;
+            const avgPredictive = predictiveFailures.reduce((a, b) => a + b, 0) / predictiveFailures.length;
+            
+            document.getElementById('advanced-stats').innerHTML = `
+                <div class="result-card">
+                    <h4>Predictive Maintenance Metrics</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>Total Failures Prevented:</span><span>${totalPrevented} (26 weeks)</span></div>
+                        <div class="stats-row"><span>Avg Weekly Failures (Reactive):</span><span>${avgReactive.toFixed(1)}</span></div>
+                        <div class="stats-row"><span>Avg Weekly Failures (Predictive):</span><span>${avgPredictive.toFixed(1)}</span></div>
+                        <div class="stats-row"><span>Failure Reduction:</span><span>${((1 - avgPredictive/avgReactive) * 100).toFixed(1)}%</span></div>
+                        <div class="stats-row"><span>48h Prediction Accuracy:</span><span>92.4%</span></div>
+                    </div>
+                </div>
+                <div class="result-card">
+                    <h4>MTBF & MTTR Analysis</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>MTBF Improvement:</span><span>+347% increase</span></div>
+                        <div class="stats-row"><span>MTTR Reduction:</span><span>-68% faster repair</span></div>
+                        <div class="stats-row"><span>Unplanned Downtime:</span><span>-82%</span></div>
+                        <div class="stats-row"><span>Maintenance Cost:</span><span>-$1.2M/year</span></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadROIFinancial() {
+            addLog('Loading ROI and Financial Impact Analysis', 'normal');
+            
+            const years = [0, 1, 2, 3, 4, 5];
+            const investment = [500, 580, 660, 740, 820, 900];
+            const savings = [0, 450, 950, 1500, 2100, 2750];
+            const cumulativeROI = years.map((_, i) => years.slice(0, i + 1).reduce((sum, y) => sum + (savings[y] - investment[y]), 0));
+            
+            const data1 = [
+                {x: years, y: investment, name: 'Cumulative Investment', type: 'scatter', mode: 'lines+markers', line: {color: '#ef4444', width: 3}},
+                {x: years, y: savings, name: 'Cumulative Savings', type: 'scatter', mode: 'lines+markers', line: {color: '#10b981', width: 3}},
+                {x: years, y: cumulativeROI, name: 'Cumulative Net ROI', type: 'scatter', mode: 'lines+markers', line: {color: '#667eea', width: 3}}
+            ];
+            
+            Plotly.newPlot('advanced-chart-1', data1, {
+                title: 'ROI & Financial Impact: 5-Year Projection ($K)',
+                xaxis: {title: 'Year'},
+                yaxis: {title: 'Amount ($K)'},
+                height: 500
+            });
+            
+            const categories = ['Labor Savings', 'Downtime Prevention', 'Energy Efficiency', 'Insurance Reduction', 'Compliance Savings'];
+            const savingsBreakdown = [380, 890, 210, 150, 120];
+            
+            const data2 = [{
+                values: savingsBreakdown,
+                labels: categories,
+                type: 'pie',
+                textinfo: 'label+percent',
+                marker: {colors: ['#10b981', '#3b82f6', '#667eea', '#f59e0b', '#8b5cf6']}
+            }];
+            
+            Plotly.newPlot('advanced-chart-2', data2, {
+                title: 'Annual Savings Breakdown ($K) - Year 3',
+                height: 400
+            });
+            
+            const roiYear5 = ((cumulativeROI[5] / investment[5]) * 100).toFixed(0);
+            
+            document.getElementById('advanced-stats').innerHTML = `
+                <div class="result-card">
+                    <h4>Financial Metrics</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>Initial Investment:</span><span>$500K</span></div>
+                        <div class="stats-row"><span>Payback Period:</span><span>1.67 years</span></div>
+                        <div class="stats-row"><span>5-Year Net ROI:</span><span>$${cumulativeROI[5]}K</span></div>
+                        <div class="stats-row"><span>ROI Percentage (Year 5):</span><span>${roiYear5}%</span></div>
+                        <div class="stats-row"><span>Annual Savings (Year 3):</span><span>$${savingsBreakdown.reduce((a, b) => a + b, 0)}K</span></div>
+                    </div>
+                </div>
+                <div class="result-card">
+                    <h4>Cost Avoidance Analysis</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>Prevented Downtime Cost:</span><span>$890K/year</span></div>
+                        <div class="stats-row"><span>Labor Cost Reduction:</span><span>$380K/year</span></div>
+                        <div class="stats-row"><span>Energy Optimization:</span><span>$210K/year</span></div>
+                        <div class="stats-row"><span>Insurance Premium Reduction:</span><span>18%</span></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadAgentPerformance() {
+            addLog('Loading Agent Performance and Efficiency Metrics', 'normal');
+            
+            const agents = ['Infrastructure Scout', 'Network Analyst', 'Compliance Auditor', 'Web Orchestrator'];
+            const avgTime = [2.3, 3.8, 4.2, 2.9];
+            const successRate = [97.2, 94.8, 96.5, 98.1];
+            
+            const data1 = [
+                {x: agents, y: avgTime, name: 'Avg Execution Time (s)', type: 'bar', marker: {color: '#667eea'}, yaxis: 'y'},
+                {x: agents, y: successRate, name: 'Success Rate (%)', type: 'scatter', mode: 'lines+markers', line: {color: '#10b981', width: 3}, marker: {size: 10}, yaxis: 'y2'}
+            ];
+            
+            const layout1 = {
+                title: 'Multi-Agent Performance Metrics',
+                xaxis: {title: 'Agent'},
+                yaxis: {title: 'Time (seconds)', side: 'left'},
+                yaxis2: {title: 'Success Rate (%)', side: 'right', overlaying: 'y', range: [85, 100]},
+                height: 500
+            };
+            
+            Plotly.newPlot('advanced-chart-1', data1, layout1);
+            
+            const tasks = Array.from({length: 50}, (_, i) => i + 1);
+            const parallelTime = tasks.map(() => 12 + Math.random() * 3);
+            const sequentialTime = tasks.map(() => 45 + Math.random() * 10);
+            
+            const data2 = [
+                {x: tasks, y: parallelTime, name: 'Parallel Execution', type: 'scatter', mode: 'lines', line: {color: '#10b981', width: 2}},
+                {x: tasks, y: sequentialTime, name: 'Sequential Baseline', type: 'scatter', mode: 'lines', line: {color: '#ef4444', width: 2}}
+            ];
+            
+            Plotly.newPlot('advanced-chart-2', data2, {
+                title: 'Parallel vs Sequential Agent Execution Time',
+                xaxis: {title: 'Task Number'},
+                yaxis: {title: 'Time (seconds)'},
+                height: 400
+            });
+            
+            const avgParallel = parallelTime.reduce((a, b) => a + b) / parallelTime.length;
+            const avgSequential = sequentialTime.reduce((a, b) => a + b) / sequentialTime.length;
+            
+            document.getElementById('advanced-stats').innerHTML = `
+                <div class="result-card">
+                    <h4>Agent Efficiency Metrics</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>Avg Task Completion:</span><span>${avgParallel.toFixed(1)}s (parallel)</span></div>
+                        <div class="stats-row"><span>Sequential Baseline:</span><span>${avgSequential.toFixed(1)}s</span></div>
+                        <div class="stats-row"><span>Speedup Factor:</span><span>${(avgSequential / avgParallel).toFixed(2)}x</span></div>
+                        <div class="stats-row"><span>Agent Communication Latency:</span><span>45ms avg</span></div>
+                        <div class="stats-row"><span>A2A Protocol Overhead:</span><span>3.2%</span></div>
+                    </div>
+                </div>
+                <div class="result-card">
+                    <h4>Individual Agent Stats</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>Scout Confidence Threshold:</span><span>85%</span></div>
+                        <div class="stats-row"><span>Analyst Prediction Accuracy:</span><span>94.8%</span></div>
+                        <div class="stats-row"><span>Auditor Compliance Detection:</span><span>96.5%</span></div>
+                        <div class="stats-row"><span>Orchestrator Deploy Success:</span><span>98.1%</span></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadScalabilityTests() {
+            addLog('Loading Scalability and Load Testing Results', 'normal');
+            
+            const concurrentUsers = [10, 50, 100, 250, 500, 1000, 2000];
+            const responseTime = [85, 92, 105, 145, 220, 380, 720];
+            const throughput = [450, 2100, 4050, 8900, 15200, 24500, 38000];
+            const errorRate = [0.1, 0.2, 0.3, 0.8, 2.1, 4.5, 8.2];
+            
+            const data1 = [
+                {x: concurrentUsers, y: responseTime, name: 'Response Time (ms)', type: 'scatter', mode: 'lines+markers', line: {color: '#667eea', width: 3}, yaxis: 'y'},
+                {x: concurrentUsers, y: errorRate, name: 'Error Rate (%)', type: 'scatter', mode: 'lines+markers', line: {color: '#ef4444', width: 3}, marker: {size: 8}, yaxis: 'y2'}
+            ];
+            
+            const layout1 = {
+                title: 'Load Testing: Response Time & Error Rate vs Concurrent Users',
+                xaxis: {title: 'Concurrent Users', type: 'log'},
+                yaxis: {title: 'Response Time (ms)', side: 'left'},
+                yaxis2: {title: 'Error Rate (%)', side: 'right', overlaying: 'y'},
+                height: 500
+            };
+            
+            Plotly.newPlot('advanced-chart-1', data1, layout1);
+            
+            const data2 = [{
+                x: concurrentUsers,
+                y: throughput,
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: {color: '#10b981', width: 3},
+                marker: {size: 10}
+            }];
+            
+            Plotly.newPlot('advanced-chart-2', data2, {
+                title: 'System Throughput vs Load',
+                xaxis: {title: 'Concurrent Users', type: 'log'},
+                yaxis: {title: 'Requests/Second'},
+                height: 400
+            });
+            
+            document.getElementById('advanced-stats').innerHTML = `
+                <div class="result-card">
+                    <h4>Scalability Metrics</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>Max Throughput:</span><span>38,000 req/s</span></div>
+                        <div class="stats-row"><span>Response Time (100 users):</span><span>105ms</span></div>
+                        <div class="stats-row"><span>Response Time (1000 users):</span><span>380ms</span></div>
+                        <div class="stats-row"><span>Error Rate (1000 users):</span><span>4.5%</span></div>
+                        <div class="stats-row"><span>Breaking Point:</span><span>~1800 concurrent users</span></div>
+                    </div>
+                </div>
+                <div class="result-card">
+                    <h4>Infrastructure Scaling</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>Auto-Scaling Trigger:</span><span>500 users</span></div>
+                        <div class="stats-row"><span>Max Instances:</span><span>24 pods</span></div>
+                        <div class="stats-row"><span>Database Connections:</span><span>2,000 max pool</span></div>
+                        <div class="stats-row"><span>CDN Cache Hit Rate:</span><span>94.3%</span></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadPatrolOptimization() {
+            addLog('Loading Advanced Patrol Route Optimization', 'normal');
+            
+            const routes = ['Random Walk', 'Fixed Grid', 'Greedy TSP', 'Genetic Algorithm', 'Astra-Grid AI'];
+            const distance = [2840, 2100, 1650, 1420, 1280];
+            const time = [185, 142, 108, 92, 78];
+            const coverage = [78, 88, 92, 96, 99.2];
+            
+            const data1 = [
+                {x: routes, y: distance, name: 'Total Distance (m)', type: 'bar', marker: {color: '#667eea'}, yaxis: 'y'},
+                {x: routes, y: time, name: 'Time (minutes)', type: 'bar', marker: {color: '#f59e0b'}, yaxis: 'y'},
+                {x: routes, y: coverage, name: 'Coverage (%)', type: 'scatter', mode: 'lines+markers', line: {color: '#10b981', width: 3}, marker: {size: 10}, yaxis: 'y2'}
+            ];
+            
+            const layout1 = {
+                title: 'Patrol Route Optimization Comparison',
+                xaxis: {title: 'Algorithm'},
+                yaxis: {title: 'Distance (m) / Time (min)', side: 'left'},
+                yaxis2: {title: 'Coverage (%)', side: 'right', overlaying: 'y', range: [70, 100]},
+                height: 500,
+                barmode: 'group'
+            };
+            
+            Plotly.newPlot('advanced-chart-1', data1, layout1);
+            
+            const iterations = Array.from({length: 100}, (_, i) => i + 1);
+            const convergence = iterations.map(i => 2840 - (2840 - 1280) * (1 - Math.exp(-i / 20)));
+            
+            const data2 = [{
+                x: iterations,
+                y: convergence,
+                type: 'scatter',
+                mode: 'lines',
+                line: {color: '#667eea', width: 3},
+                fill: 'tozeroy'
+            }];
+            
+            Plotly.newPlot('advanced-chart-2', data2, {
+                title: 'AI Route Optimization Convergence',
+                xaxis: {title: 'Training Iteration'},
+                yaxis: {title: 'Route Distance (m)'},
+                height: 400
+            });
+            
+            document.getElementById('advanced-stats').innerHTML = `
+                <div class="result-card">
+                    <h4>Optimization Results</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>Distance Reduction:</span><span>-54.9% vs random</span></div>
+                        <div class="stats-row"><span>Time Savings:</span><span>-57.8% faster</span></div>
+                        <div class="stats-row"><span>Coverage Improvement:</span><span>+27.2%</span></div>
+                        <div class="stats-row"><span>Energy Efficiency:</span><span>-48% battery usage</span></div>
+                        <div class="stats-row"><span>Convergence Time:</span><span>~60 iterations</span></div>
+                    </div>
+                </div>
+                <div class="result-card">
+                    <h4>Dynamic Factors</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>Obstacle Avoidance:</span><span>Real-time rerouting</span></div>
+                        <div class="stats-row"><span>Priority Targets:</span><span>Critical first</span></div>
+                        <div class="stats-row"><span>Battery Optimization:</span><span>Return-to-base at 15%</span></div>
+                        <div class="stats-row"><span>Multi-Robot Coordination:</span><span>3 robots, no overlap</span></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadObstacleAvoidance() {
+            addLog('Loading Autonomous Navigation with Obstacle Avoidance', 'normal');
+            
+            const scenarios = ['Open Corridor', 'Narrow Aisle', 'Dense Equipment', 'Moving Personnel', 'Emergency'];
+            const successRate = [99.8, 98.2, 95.4, 92.7, 96.5];
+            const avgDetectionDist = [3.5, 2.8, 1.9, 2.1, 2.5];
+            
+            const data1 = [
+                {x: scenarios, y: successRate, name: 'Success Rate (%)', type: 'bar', marker: {color: '#10b981'}},
+                {x: scenarios, y: avgDetectionDist, name: 'Detection Distance (m)', type: 'scatter', mode: 'lines+markers', line: {color: '#667eea', width: 3}, marker: {size: 10}, yaxis: 'y2'}
+            ];
+            
+            const layout1 = {
+                title: 'Obstacle Avoidance Performance by Scenario',
+                xaxis: {title: 'Scenario'},
+                yaxis: {title: 'Success Rate (%)', side: 'left', range: [90, 100]},
+                yaxis2: {title: 'Detection Distance (m)', side: 'right', overlaying: 'y'},
+                height: 500
+            };
+            
+            Plotly.newPlot('advanced-chart-1', data1, layout1);
+            
+            const sensors = ['LiDAR', 'Stereo Camera', 'Ultrasonic', 'IR Sensor', 'Fusion Model'];
+            const accuracy = [94.2, 89.5, 78.3, 82.1, 97.8];
+            
+            const data2 = [{
+                x: sensors,
+                y: accuracy,
+                type: 'bar',
+                marker: {color: accuracy.map(a => a > 95 ? '#10b981' : '#667eea')}
+            }];
+            
+            Plotly.newPlot('advanced-chart-2', data2, {
+                title: 'Sensor Accuracy: Individual vs Fusion',
+                xaxis: {title: 'Sensor Type'},
+                yaxis: {title: 'Detection Accuracy (%)', range: [70, 100]},
+                height: 400
+            });
+            
+            document.getElementById('advanced-stats').innerHTML = `
+                <div class="result-card">
+                    <h4>Navigation Metrics</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>Overall Success Rate:</span><span>96.5%</span></div>
+                        <div class="stats-row"><span>Avg Reaction Time:</span><span>248ms</span></div>
+                        <div class="stats-row"><span>False Positive Rate:</span><span>2.1%</span></div>
+                        <div class="stats-row"><span>Collision Incidents:</span><span>0 (12,000 hrs)</span></div>
+                        <div class="stats-row"><span>Sensor Fusion Advantage:</span><span>+3.6% accuracy</span></div>
+                    </div>
+                </div>
+                <div class="result-card">
+                    <h4>Advanced Features</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>Dynamic Path Planning:</span><span>Real-time A* algorithm</span></div>
+                        <div class="stats-row"><span>Human Detection Range:</span><span>5m with 98% accuracy</span></div>
+                        <div class="stats-row"><span>Emergency Stop:</span><span>&lt;150ms response</span></div>
+                        <div class="stats-row"><span>Terrain Adaptation:</span><span>Ramps, stairs, cables</span></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadHandwritingOCR() {
+            addLog('Loading Handwritten Maintenance Log Extraction', 'normal');
+            
+            const logTypes = ['Printed Forms', 'Cursive Notes', 'Technical Symbols', 'Mixed Format', 'Damaged/Faded'];
+            const accuracy = [98.5, 87.3, 92.1, 89.7, 82.4];
+            const confidence = [96.2, 82.5, 88.9, 85.3, 76.8];
+            
+            const data1 = [
+                {x: logTypes, y: accuracy, name: 'OCR Accuracy (%)', type: 'bar', marker: {color: '#667eea'}},
+                {x: logTypes, y: confidence, name: 'Confidence Score (%)', type: 'bar', marker: {color: '#f59e0b'}}
+            ];
+            
+            Plotly.newPlot('advanced-chart-1', data1, {
+                title: 'Handwriting OCR Performance by Document Type',
+                barmode: 'group',
+                xaxis: {title: 'Document Type'},
+                yaxis: {title: 'Performance (%)'},
+                height: 500
+            });
+            
+            const characters = ['A-Z', '0-9', 'Technical', 'Cursive', 'Symbols'];
+            const recognitionRate = [99.1, 98.7, 95.3, 87.3, 91.2];
+            
+            const data2 = [{
+                values: recognitionRate,
+                labels: characters,
+                type: 'pie',
+                textinfo: 'label+percent',
+                marker: {colors: ['#10b981', '#3b82f6', '#667eea', '#f59e0b', '#8b5cf6']}
+            }];
+            
+            Plotly.newPlot('advanced-chart-2', data2, {
+                title: 'Character Recognition Rate Distribution',
+                height: 400
+            });
+            
+            document.getElementById('advanced-stats').innerHTML = `
+                <div class="result-card">
+                    <h4>Handwriting OCR Stats</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>Overall Accuracy:</span><span>89.8%</span></div>
+                        <div class="stats-row"><span>Cursive Recognition:</span><span>87.3%</span></div>
+                        <div class="stats-row"><span>Processing Speed:</span><span>1.2s per page</span></div>
+                        <div class="stats-row"><span>Multi-Language Support:</span><span>12 languages</span></div>
+                        <div class="stats-row"><span>Fine-Tuning Dataset:</span><span>50K annotated logs</span></div>
+                    </div>
+                </div>
+                <div class="result-card">
+                    <h4>Technical Capabilities</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>Equation Recognition:</span><span>92.1%</span></div>
+                        <div class="stats-row"><span>Diagram Annotation:</span><span>89.5%</span></div>
+                        <div class="stats-row"><span>Weathered Text Recovery:</span><span>82.4%</span></div>
+                        <div class="stats-row"><span>Context Correction:</span><span>+5.2% accuracy boost</span></div>
+                    </div>
+                    </div>
+            `;
+        }
+
+        function loadFiberOpticAnalysis() {
+            addLog('Loading Fiber-Optic Schematic Interpretation', 'normal');
+            
+            const complexity = ['Simple P2P', 'Star Topology', 'Ring Network', 'Mesh Network', 'Hybrid Complex'];
+            const extractionAccuracy = [97.5, 94.2, 91.8, 87.3, 83.9];
+            const processingTime = [2.1, 3.8, 5.9, 9.2, 14.5];
+            
+            const data1 = [
+                {x: complexity, y: extractionAccuracy, name: 'Extraction Accuracy (%)', type: 'bar', marker: {color: '#10b981'}, yaxis: 'y'},
+                {x: complexity, y: processingTime, name: 'Processing Time (s)', type: 'scatter', mode: 'lines+markers', line: {color: '#ef4444', width: 3}, marker: {size: 10}, yaxis: 'y2'}
+            ];
+            
+            const layout1 = {
+                title: 'Fiber-Optic Topology Extraction: Accuracy vs Complexity',
+                xaxis: {title: 'Network Complexity'},
+                yaxis: {title: 'Accuracy (%)', side: 'left', range: [80, 100]},
+                yaxis2: {title: 'Processing Time (s)', side: 'right', overlaying: 'y'},
+                height: 500
+            };
+            
+            Plotly.newPlot('advanced-chart-1', data1, layout1);
+            
+            const components = ['Fiber Cables', 'Connectors', 'Splitters', 'Amplifiers', 'Switches', 'Endpoints'];
+            const detectionRate = [98.2, 96.5, 93.8, 91.2, 94.7, 97.1];
+            
+            const data2 = [{
+                x: components,
+                y: detectionRate,
+                type: 'bar',
+                marker: {color: '#667eea'}
+            }];
+            
+            Plotly.newPlot('advanced-chart-2', data2, {
+                title: 'Component Detection Rate in Schematics',
+                xaxis: {title: 'Component Type'},
+                yaxis: {title: 'Detection Rate (%)', range: [85, 100]},
+                height: 400
+            });
+            
+            document.getElementById('advanced-stats').innerHTML = `
+                <div class="result-card">
+                    <h4>Schematic Analysis Metrics</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>Overall Extraction Accuracy:</span><span>90.9%</span></div>
+                        <div class="stats-row"><span>Connection Mapping:</span><span>95.3% correct</span></div>
+                        <div class="stats-row"><span>Topology Reconstruction:</span><span>92.1% fidelity</span></div>
+                        <div class="stats-row"><span>Symbol Recognition:</span><span>96.8%</span></div>
+                        <div class="stats-row"><span>Max Network Nodes:</span><span>1,250 nodes</span></div>
+                    </div>
+                </div>
+                <div class="result-card">
+                    <h4>Advanced Features</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>Multi-Page Linking:</span><span>Supported</span></div>
+                        <div class="stats-row"><span>3D Path Visualization:</span><span>WebGL rendering</span></div>
+                        <div class="stats-row"><span>Signal Loss Prediction:</span><span>±0.3 dB accuracy</span></div>
+                        <div class="stats-row"><span>Auto-Correction:</span><span>Fixes 78% of ambiguities</span></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadTemporalFailure() {
+            addLog('Loading Failure Prediction with Temporal Patterns', 'normal');
+            
+            const hours = Array.from({length: 168}, (_, i) => i);
+            const temperature = hours.map(h => 45 + 15 * Math.sin(h * Math.PI / 12) + (Math.random() - 0.5) * 5);
+            const vibration = hours.map(h => 2.5 + 1.5 * Math.sin(h * Math.PI / 24) + (Math.random() - 0.5) * 0.8);
+            const failureProb = hours.map((h, i) => {
+                const tempFactor = (temperature[i] - 45) / 15;
+                const vibFactor = (vibration[i] - 2.5) / 1.5;
+                return Math.max(0, Math.min(100, 20 + tempFactor * 30 + vibFactor * 25 + (Math.random() - 0.5) * 10));
+            });
+            
+            const data1 = [
+                {x: hours, y: temperature, name: 'Temperature (°C)', type: 'scatter', mode: 'lines', line: {color: '#ef4444', width: 2}, yaxis: 'y'},
+                {x: hours, y: vibration, name: 'Vibration (mm/s)', type: 'scatter', mode: 'lines', line: {color: '#3b82f6', width: 2}, yaxis: 'y2'},
+                {x: hours, y: failureProb, name: 'Failure Probability (%)', type: 'scatter', mode: 'lines', line: {color: '#f59e0b', width: 3}, yaxis: 'y3'}
+            ];
+            
+            const layout1 = {
+                title: 'Temporal Pattern Analysis: Multi-Sensor Failure Prediction (1 Week)',
+                xaxis: {title: 'Hours'},
+                yaxis: {title: 'Temperature (°C)', side: 'left', color: '#ef4444'},
+                yaxis2: {title: 'Vibration (mm/s)', side: 'right', overlaying: 'y', color: '#3b82f6'},
+                yaxis3: {title: 'Failure Prob (%)', side: 'right', overlaying: 'y', position: 0.95, color: '#f59e0b'},
+                height: 500
+            };
+            
+            Plotly.newPlot('advanced-chart-1', data1, layout1);
+            
+            const windows = ['1h', '6h', '12h', '24h', '48h', '72h', '7d'];
+            const precision = [68.2, 78.5, 84.3, 92.4, 94.1, 95.8, 96.3];
+            const recall = [71.5, 81.2, 86.7, 90.8, 92.5, 93.9, 95.1];
+            
+            const data2 = [
+                {x: windows, y: precision, name: 'Precision', type: 'scatter', mode: 'lines+markers', line: {color: '#10b981', width: 3}, marker: {size: 10}},
+                {x: windows, y: recall, name: 'Recall', type: 'scatter', mode: 'lines+markers', line: {color: '#667eea', width: 3}, marker: {size: 10}}
+            ];
+            
+            Plotly.newPlot('advanced-chart-2', data2, {
+                title: 'Prediction Precision & Recall by Time Window',
+                xaxis: {title: 'Prediction Window'},
+                yaxis: {title: 'Performance (%)', range: [60, 100]},
+                height: 400
+            });
+            
+            document.getElementById('advanced-stats').innerHTML = `
+                <div class="result-card">
+                    <h4>Temporal Analysis Metrics</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>24h Prediction Accuracy:</span><span>92.4%</span></div>
+                        <div class="stats-row"><span>48h Precision/Recall:</span><span>94.1% / 92.5%</span></div>
+                        <div class="stats-row"><span>Pattern Recognition:</span><span>Cyclic, trend, anomaly</span></div>
+                        <div class="stats-row"><span>LSTM Model Depth:</span><span>3 layers, 256 units</span></div>
+                        <div class="stats-row"><span>Training Data:</span><span>18 months history</span></div>
+                    </div>
+                </div>
+                <div class="result-card">
+                    <h4>Sensor Fusion Results</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>Multi-Sensor Inputs:</span><span>12 parameters</span></div>
+                        <div class="stats-row"><span>Correlation Analysis:</span><span>Temp-Vibration: 0.67</span></div>
+                        <div class="stats-row"><span>Early Warning:</span><span>72h before failure</span></div>
+                        <div class="stats-row"><span>False Alarm Rate:</span><span>5.9%</span></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadIronwoodTPU() {
+            addLog('Loading Google Ironwood (7th-Gen TPU) & RAN Guardian Integration', 'normal');
+            
+            const hardware = ['CPU Baseline', 'GPU (A100)', 'TPU v4', 'TPU v5p', 'Ironwood (v7)'];
+            const throughput = [120, 890, 2100, 4500, 8900];
+            const powerEfficiency = [0.5, 2.8, 8.5, 15.2, 28.4];
+            const costPerInference = [0.012, 0.0045, 0.0018, 0.0009, 0.00042];
+            
+            const data1 = [
+                {x: hardware, y: throughput, name: 'Throughput (infer/s)', type: 'bar', marker: {color: '#667eea'}, yaxis: 'y'},
+                {x: hardware, y: powerEfficiency, name: 'Power Efficiency (TOPS/W)', type: 'scatter', mode: 'lines+markers', line: {color: '#10b981', width: 3}, marker: {size: 10}, yaxis: 'y2'}
+            ];
+            
+            const layout1 = {
+                title: 'Google Ironwood TPU Performance Comparison',
+                xaxis: {title: 'Hardware Platform'},
+                yaxis: {title: 'Throughput (inferences/s)', side: 'left', type: 'log'},
+                yaxis2: {title: 'Power Efficiency (TOPS/W)', side: 'right', overlaying: 'y'},
+                height: 500
+            };
+            
+            Plotly.newPlot('advanced-chart-1', data1, layout1);
+            
+            const data2 = [{
+                x: hardware,
+                y: costPerInference,
+                type: 'bar',
+                marker: {color: costPerInference.map(c => c < 0.001 ? '#10b981' : '#667eea')}
+            }];
+            
+            Plotly.newPlot('advanced-chart-2', data2, {
+                title: 'Cost per Inference Comparison ($)',
+                xaxis: {title: 'Hardware Platform'},
+                yaxis: {title: 'Cost per Inference ($)', type: 'log'},
+                height: 400
+            });
+            
+            document.getElementById('advanced-stats').innerHTML = `
+                <div class="result-card">
+                    <h4>Ironwood TPU Metrics</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>Peak Throughput:</span><span>8,900 infer/s</span></div>
+                        <div class="stats-row"><span>vs GPU (A100):</span><span>10x faster</span></div>
+                        <div class="stats-row"><span>Power Efficiency:</span><span>28.4 TOPS/W</span></div>
+                        <div class="stats-row"><span>Cost Reduction:</span><span>-91% vs CPU</span></div>
+                        <div class="stats-row"><span>Model Size Support:</span><span>Up to 100B params</span></div>
+                    </div>
+                </div>
+                <div class="result-card">
+                    <h4>RAN Guardian Integration</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>5G Network Monitoring:</span><span>Real-time analysis</span></div>
+                        <div class="stats-row"><span>Latency Optimization:</span><span>-65% reduction</span></div>
+                        <div class="stats-row"><span>Telecom Failure Detection:</span><span>97.2% accuracy</span></div>
+                        <div class="stats-row"><span>Edge-Cloud Hybrid:</span><span>Seamless orchestration</span></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadEmbodiedAI() {
+            addLog('Loading Embodied AI Impact Assessment', 'normal');
+            
+            const metrics = ['Task Completion', 'Physical Safety', 'Human Collaboration', 'Adaptability', 'Resource Efficiency'];
+            const preEmbodied = [45, 62, 38, 51, 48];
+            const postEmbodied = [92, 97, 88, 94, 91];
+            
+            const data1 = [
+                {x: metrics, y: preEmbodied, name: 'Pre-Embodied AI', type: 'bar', marker: {color: '#ef4444'}},
+                {x: metrics, y: postEmbodied, name: 'Astra-Grid (Embodied)', type: 'bar', marker: {color: '#10b981'}}
+            ];
+            
+            Plotly.newPlot('advanced-chart-1', data1, {
+                title: 'Embodied AI Integration Success Metrics',
+                barmode: 'group',
+                xaxis: {title: 'Success Factor'},
+                yaxis: {title: 'Performance Score', range: [0, 100]},
+                height: 500
+            });
+            
+            const quarters = ['Q1 2024', 'Q2 2024', 'Q3 2024', 'Q4 2024', 'Q1 2025'];
+            const adoption = [12, 28, 52, 78, 94];
+            const incidentReduction = [0, 15, 38, 62, 82];
+            const productivity = [100, 115, 142, 178, 215];
+            
+            const data2 = [
+                {x: quarters, y: adoption, name: 'Adoption Rate (%)', type: 'scatter', mode: 'lines+markers', line: {color: '#667eea', width: 3}},
+                {x: quarters, y: incidentReduction, name: 'Incident Reduction (%)', type: 'scatter', mode: 'lines+markers', line: {color: '#10b981', width: 3}},
+                {x: quarters, y: productivity, name: 'Productivity Index', type: 'scatter', mode: 'lines+markers', line: {color: '#f59e0b', width: 3}, yaxis: 'y2'}
+            ];
+            
+            const layout2 = {
+                title: 'Embodied AI Deployment Timeline & Impact',
+                xaxis: {title: 'Quarter'},
+                yaxis: {title: 'Percentage (%)', side: 'left'},
+                yaxis2: {title: 'Productivity Index', side: 'right', overlaying: 'y'},
+                height: 400
+            };
+            
+            Plotly.newPlot('advanced-chart-2', data2, layout2);
+            
+            document.getElementById('advanced-stats').innerHTML = `
+                <div class="result-card">
+                    <h4>Embodied AI Success Metrics</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>Task Completion Rate:</span><span>92% (vs 45% manual)</span></div>
+                        <div class="stats-row"><span>Physical Safety Score:</span><span>97/100</span></div>
+                        <div class="stats-row"><span>Human-AI Collaboration:</span><span>88% satisfaction</span></div>
+                        <div class="stats-row"><span>Adaptability Index:</span><span>94/100</span></div>
+                        <div class="stats-row"><span>Overall Improvement:</span><span>+96% average</span></div>
+                    </div>
+                </div>
+                <div class="result-card">
+                    <h4>Real-World Integration</h4>
+                    <div class="stats-panel">
+                        <div class="stats-row"><span>Deployment Sites:</span><span>18 data centers</span></div>
+                        <div class="stats-row"><span>Robot Fleet Size:</span><span>47 RDK X5 units</span></div>
+                        <div class="stats-row"><span>Total Operating Hours:</span><span>126,000+ hrs</span></div>
+                        <div class="stats-row"><span>Incident-Free Days:</span><span>423 consecutive</span></div>
+                        <div class="stats-row"><span>Productivity Gain:</span><span>+115%</span></div>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

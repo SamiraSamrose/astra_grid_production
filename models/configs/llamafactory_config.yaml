@@ -1,0 +1,41 @@
+
+model_name: ERNIE-4.5-21B
+training_type: llamafactory_sft
+model_config:
+quantization: 4bit
+load_in_4bit: true
+use_flash_attention_2: true
+torch_dtype: bfloat16
+lora_config:
+r: 64
+lora_alpha: 128
+target_modules: all
+lora_dropout: 0.05
+bias: none
+training_arguments:
+output_dir: ./models/weights/astra-grid-llamafactory
+stages: 3
+per_device_train_batch_size: 16
+learning_rate: 0.0002
+lr_scheduler_type: cosine
+warmup_steps: 100
+weight_decay: 0.01
+num_train_epochs: 3
+logging_steps: 10
+save_strategy: epoch
+prompt_masking: true
+flash_attention_2: true
+max_seq_length: 32768
+datasets:
+
+name: technical_manuals
+type: telecom_safety
+preprocessing: technical_veracity
+name: ieee_osha_standards
+type: regulatory
+preprocessing: citation_extraction
+
+prompt_template: |
+Instruction: {instruction}
+Input: {input}
+Response:

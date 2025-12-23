@@ -1,0 +1,10 @@
+.multi-agent-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.agent-name {
+  color: #67e8f9;
+  font-weight: bold;
+}

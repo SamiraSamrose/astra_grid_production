@@ -1,0 +1,46 @@
+.app-nav {
+  background: #2d3748;
+  padding: 0;
+  display: flex;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.app-nav::-webkit-scrollbar {
+  height: 6px;
+}
+
+.app-nav::-webkit-scrollbar-track {
+  background: #1a202c;
+}
+
+.app-nav::-webkit-scrollbar-thumb {
+  background: #4a5568;
+  border-radius: 3px;
+}
+
+.app-nav button {
+  padding: 1rem 1.5rem;
+  background: transparent;
+  border: none;
+  color: #cbd5e0;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+  flex-shrink: 0;
+}
+
+.app-nav button:hover {
+  background: #4a5568;
+  color: white;
+  border-bottom-color: #667eea;
+}
+
+.app-nav button.active {
+  background: #4a5568;
+  color: white;
+  border-bottom-color: #667eea;
+}

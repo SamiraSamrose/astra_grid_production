@@ -1,0 +1,39 @@
+
+model_name: PaddleOCR-VL
+training_type: completion_only
+model_config:
+det_model: PP-OCRv4_det
+rec_model: PP-OCRv4_rec
+cls_model: PP-OCRv4_cls
+use_angle_cls: true
+lang: en
+training_config:
+iterations: 50
+batch_size: 32
+learning_rate: 0.001
+optimizer: Adam
+weight_decay: 0.0001
+augmentation:
+weathering: true
+rust_simulation: true
+lighting_variation: true
+angle_rotation: true
+noise_injection: true
+completion_only_training:
+enabled: true
+mask_instruction: true
+focus_on_output: true
+datasets:
+
+name: industrial_images
+type: analog_gauges
+count: 2000
+name: serial_plates
+type: weathered_metal
+count: 1500
+name: technical_diagrams
+type: schematics
+count: 1500
+
+confidence_threshold: 0.85
+output_dir: ./models/weights/paddleocr-vl

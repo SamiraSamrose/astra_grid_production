@@ -114,6 +114,8 @@ Download pre-trained weights:
 - **HuggingFace**: https://huggingface.co/samirasamrose/astra_grid_production/astra-grid-ernie-4.5-lora
 - **GitHub**: https://github.com/samirasamrose/astra_grid_production/astra-grid-infrastructure-audit
 
+- https://github.com/SamiraSamrose/astra_grid_production/blob/main/astra-grid-infrastructure-audit.yaml
+
 ## API Documentation
 
 ### Scanner Endpoints

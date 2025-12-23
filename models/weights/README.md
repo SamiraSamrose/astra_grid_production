@@ -31,8 +31,8 @@ Confidence Threshold: 85%
 Download
 Download pre-trained weights from:
 
-HuggingFace: https://huggingface.co/your-profile/astra-grid-ernie-4.5-lora
-GitHub Releases: https://github.com/your-profile/astra-grid-infrastructure-audit/releases
+HuggingFace: https://huggingface.co/samirasamrose/astra-grid-ernie-4.5-lora
+GitHub Releases: https://github.com/samirasamrose/astra-grid-infrastructure-audit/releases
 
 Usage
 pythonfrom app.ml.unsloth_model import UnslothModel
